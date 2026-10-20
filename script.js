@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initMobileNav();
   initScrollHeader();
+  initGuruFilter();
+  initGuruModal();
   initPPDBForm();
   initContactForm();
   initAryaBot();
@@ -76,6 +78,103 @@ function initScrollHeader() {
     } else {
       header?.classList.remove('scrolled');
     }
+  });
+}
+
+/* --------------------------------------------------------------------------
+   3.5. GURU & STAFF FILTER
+   -------------------------------------------------------------------------- */
+function initGuruFilter() {
+  const filterBtns = document.querySelectorAll('.guru-filter-btn');
+  const cards = document.querySelectorAll('.guru-card');
+
+  if (!filterBtns.length || !cards.length) return;
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filter = btn.getAttribute('data-filter');
+      cards.forEach(card => {
+        if (filter === 'all' || card.getAttribute('data-category') === filter) {
+          card.style.display = 'flex';
+          card.style.animation = 'fadeIn 0.3s ease';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   3.6. FLOATING GURU DETAIL MODAL
+   -------------------------------------------------------------------------- */
+function initGuruModal() {
+  const modal = document.getElementById('guru-modal');
+  const modalClose = document.getElementById('guru-modal-close');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  const cards = document.querySelectorAll('.guru-card');
+
+  if (!modal || !cards.length) return;
+
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  modalClose?.addEventListener('click', closeModal);
+  modalCloseBtn?.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const img = card.querySelector('.guru-photo-container img');
+      const badge = card.querySelector('.guru-badge-tag');
+      const name = card.querySelector('.guru-title-name');
+      const role = card.querySelector('.guru-role-sub');
+
+      const values = card.querySelectorAll('.guru-detail-value');
+      const ttl = values[0]?.textContent || '-';
+      const pendidikan = values[1]?.textContent || '-';
+      const masakerja = values[2]?.textContent || '-';
+
+      const modalImg = document.getElementById('modal-guru-img');
+      const modalBadge = document.getElementById('modal-guru-badge');
+      const modalName = document.getElementById('modal-guru-name');
+      const modalRole = document.getElementById('modal-guru-role');
+      const modalTtl = document.getElementById('modal-guru-ttl');
+      const modalPendidikan = document.getElementById('modal-guru-pendidikan');
+      const modalMasaKerja = document.getElementById('modal-guru-masakerja');
+
+      if (modalImg && img) {
+        modalImg.src = img.src;
+        modalImg.alt = img.alt;
+      }
+      if (modalBadge && badge) modalBadge.textContent = badge.textContent.trim();
+      if (modalName && name) modalName.textContent = name.textContent.trim();
+      if (modalRole && role) modalRole.textContent = role.textContent.trim();
+      if (modalTtl) modalTtl.textContent = ttl.trim();
+      if (modalPendidikan) modalPendidikan.textContent = pendidikan.trim();
+      if (modalMasaKerja) modalMasaKerja.textContent = masakerja.trim();
+
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    });
   });
 }
 
@@ -291,6 +390,8 @@ function getAryaBotReply(query) {
     return 'Kampus Yayasan Arya Jaya Sentika berlokasi di <strong>Jl. Arya Jaya Sentika No. 88, Balaraja - Tigaraksa, Kab. Tangerang, Banten 15720</strong>.';
   } else if (q.includes('kontak') || q.includes('telepon') || q.includes('wa') || q.includes('hp')) {
     return 'Anda dapat menghubungi Sekretariat Yayasan di nomor <strong>(021) 555-0199</strong> / WhatsApp <strong>0812-3456-7890</strong> atau email <strong>info@ypajs.sch.id</strong>.';
+  } else if (q.includes('guru') || q.includes('kepala sekolah') || q.includes('staf') || q.includes('pendidik')) {
+    return 'Yayasan Arya Jaya Sentika memiliki jajaran pendidik & staf berdedikasi tinggi, dipimpin oleh <strong>Ibu Ayu Wulandari, S.Pd.</strong> selaku Kepala Sekolah. Anda dapat melihat profil lengkap pada bagian <a href="#guru" style="color:var(--primary); font-weight:bold;">Dewan Guru & Staf</a>!';
   } else if (q.includes('biaya') || q.includes('spp') || q.includes('uang pangkal')) {
     return 'Untuk rincian biaya SPP dan Uang Pangkal TK & SD Arya Jaya Sentika, silakan isi form PPDB atau kunjungi kantor sekretariat kami pada jam kerja (Senin-Jumat, 07.00-15.00 WIB).';
   } else {
